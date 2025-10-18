@@ -22,3 +22,8 @@ go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2
 ```bash
 protoc --go_out=. --go-grpc_out=. proto/file_service.proto
 ```
+
+Установите зависимости:<br>
+```bash
+go get -u github.com/lib/pq
+```
