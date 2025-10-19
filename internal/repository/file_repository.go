@@ -32,7 +32,22 @@ func (r *postgresFileRepository) Save(ctx context.Context, file *domain.File) er
 	return err
 }
 func (r *postgresFileRepository) GetByFileName(ctx context.Context, fileName string) (*domain.File, error) {
-	return nil, nil
+	query := `SELECT id, filename, size, path, created_at, updated_at FROM files WHERE filename = $1`
+
+	file := &domain.File{}
+	err := r.db.QueryRowContext(ctx, query, fileName).Scan(
+		&file.ID,
+		&file.Filename,
+		&file.Size,
+		&file.Path,
+		&file.CreatedAt,
+		&file.UpdatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return file, nil
 }
 func (r *postgresFileRepository) List(ctx context.Context, page, pageSize int) (*domain.FileList, error) {
 	return nil, nil

@@ -2,12 +2,12 @@ package usecase
 
 import (
 	"context"
-	"github.com/google/uuid"
 	"io"
 	"os"
 	"path/filepath"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/grpc-file-storage-go/internal/domain"
 	"github.com/grpc-file-storage-go/internal/repository"
 )
@@ -63,7 +63,17 @@ func (uc *fileUseCase) UploadFile(ctx context.Context, filename string, data io.
 }
 
 func (uc *fileUseCase) DownLoadFile(ctx context.Context, filename string) (*domain.File, io.Reader, error) {
-	return nil, nil, nil
+	file, err := uc.repo.GetByFileName(ctx, filename)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	fileReader, err := os.Open(file.Path)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return file, fileReader, nil
 }
 
 func (uc *fileUseCase) ListFiles(ctx context.Context, page, pageSize int) (*domain.FileList, error) {

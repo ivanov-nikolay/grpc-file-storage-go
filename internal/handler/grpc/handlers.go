@@ -61,7 +61,30 @@ func (h *fileHandler) UploadFile(stream proto.FileService_UploadFileServer) erro
 	})
 }
 
-func (h *fileHandler) DownloadFile(*proto.DownloadFileRequest, proto.FileService_DownloadFileServer) error {
+func (h *fileHandler) DownloadFile(req *proto.DownloadFileRequest, stream proto.FileService_DownloadFileServer) error {
+	_, reader, err := h.fileUseCase.DownLoadFile(stream.Context(), req.Filename)
+	if err != nil {
+		return status.Error(codes.Internal, err.Error())
+	}
+	defer reader.(io.Closer).Close()
+
+	buffer := make([]byte, 64*1024)
+	for {
+		n, err := reader.Read(buffer)
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return status.Error(codes.Internal, err.Error())
+		}
+
+		if err := stream.Send(&proto.DownloadFileResponse{
+			ChunkData: buffer[:n],
+		}); err != nil {
+			return status.Error(codes.Internal, err.Error())
+		}
+	}
+
 	return nil
 }
 
