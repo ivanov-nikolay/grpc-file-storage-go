@@ -2,12 +2,16 @@ package main
 
 import (
 	"log"
+	"net"
 
+	"github.com/grpc-file-storage-go/api/proto"
 	"github.com/grpc-file-storage-go/internal/config"
-	"github.com/grpc-file-storage-go/internal/handler/grpc"
+	handlergrpc "github.com/grpc-file-storage-go/internal/handler/grpc"
 	"github.com/grpc-file-storage-go/internal/repository"
 	"github.com/grpc-file-storage-go/internal/usecase"
 	"github.com/grpc-file-storage-go/pkg/database"
+
+	"google.golang.org/grpc"
 )
 
 func main() {
@@ -29,6 +33,28 @@ func main() {
 
 	fileUseCase := usecase.NewFileUseCase(fileRepo, cfg.StoragePath)
 
-	fileHandler := grpc.NewFileHandler(fileUseCase)
-	_ = fileHandler
+	fileHandler := handlergrpc.NewFileHandler(fileUseCase)
+
+	limiter := handlergrpc.NewConcurrencyLimiter(
+		cfg.UploadLimit,
+		cfg.DownloadLimit,
+		cfg.ListLimit,
+	)
+
+	server := grpc.NewServer(
+		grpc.UnaryInterceptor(limiter.UnaryInterceptor()),
+		grpc.StreamInterceptor(limiter.StreamInterceptor()),
+	)
+
+	proto.RegisterFileServiceServer(server, fileHandler)
+
+	lis, err := net.Listen("tcp", ":"+cfg.GRPCPort)
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+
+	log.Printf("serving gRPC starting on port %s", cfg.GRPCPort)
+	if err := server.Serve(lis); err != nil {
+		log.Fatalf("failed to serve: %v", err)
+	}
 }
