@@ -6,6 +6,7 @@ import (
 
 	"github.com/grpc-file-storage-go/internal/config"
 	"github.com/grpc-file-storage-go/internal/repository"
+	"github.com/grpc-file-storage-go/internal/usecase"
 	"github.com/grpc-file-storage-go/pkg/database"
 	"github.com/grpc-file-storage-go/pkg/utils"
 )
@@ -23,6 +24,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to get project root: %v", err)
 	}
+
 	migrationsDir := filepath.Join(projectRoot, "migrations")
 
 	if err := migrationManager.RunMigrations(migrationsDir); err != nil {
@@ -32,5 +34,6 @@ func main() {
 	fileRepo := repository.NewPostgresFileRepository(db)
 	defer db.Close()
 
-	_ = fileRepo
+	fileUseCase := usecase.NewFileUseCase(fileRepo, cfg.StoragePath)
+	_ = fileUseCase
 }
