@@ -1,14 +1,11 @@
 package main
 
 import (
-	"log"
-	"path/filepath"
-
 	"github.com/grpc-file-storage-go/internal/config"
 	"github.com/grpc-file-storage-go/internal/repository"
 	"github.com/grpc-file-storage-go/internal/usecase"
 	"github.com/grpc-file-storage-go/pkg/database"
-	"github.com/grpc-file-storage-go/pkg/utils"
+	"log"
 )
 
 func main() {
@@ -20,14 +17,8 @@ func main() {
 	}
 
 	migrationManager := database.NewMigrationManager(db)
-	projectRoot, err := utils.GetProjectRoot()
-	if err != nil {
-		log.Fatalf("failed to get project root: %v", err)
-	}
 
-	migrationsDir := filepath.Join(projectRoot, "migrations")
-
-	if err := migrationManager.RunMigrations(migrationsDir); err != nil {
+	if err := migrationManager.RunMigrations(cfg.MigrationsPath); err != nil {
 		log.Fatalf("failed to run migrations: %v", err)
 	}
 
