@@ -9,6 +9,7 @@ import (
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type fileHandler struct {
@@ -89,7 +90,34 @@ func (h *fileHandler) DownloadFile(req *proto.DownloadFileRequest, stream proto.
 }
 
 func (h *fileHandler) ListFiles(ctx context.Context, req *proto.ListFilesRequest) (*proto.ListFilesResponse, error) {
-	return &proto.ListFilesResponse{}, nil
+	page := int(req.Page)
+	if page == 0 {
+		page = 1
+	}
+	pageSize := int(req.PageSize)
+	if pageSize == 0 {
+		pageSize = 20
+	}
+
+	fileList, err := h.fileUseCase.ListFiles(ctx, page, pageSize)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	files := make([]*proto.FileMetadata, len(fileList.Files))
+	for i, file := range fileList.Files {
+		files[i] = &proto.FileMetadata{
+			Filename:  file.Filename,
+			Size:      uint32(file.Size),
+			CreatedAt: timestamppb.New(file.CreatedAt),
+			UpdatedAt: timestamppb.New(file.UpdatedAt),
+		}
+	}
+
+	return &proto.ListFilesResponse{
+		Files:      files,
+		TotalCount: int32(fileList.Total),
+	}, nil
 }
 
 type bytesReader struct {

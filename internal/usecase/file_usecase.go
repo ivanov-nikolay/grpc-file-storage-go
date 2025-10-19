@@ -7,9 +7,10 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/grpc-file-storage-go/internal/domain"
 	"github.com/grpc-file-storage-go/internal/repository"
+
+	"github.com/google/uuid"
 )
 
 type fileUseCase struct {
@@ -77,5 +78,12 @@ func (uc *fileUseCase) DownLoadFile(ctx context.Context, filename string) (*doma
 }
 
 func (uc *fileUseCase) ListFiles(ctx context.Context, page, pageSize int) (*domain.FileList, error) {
-	return nil, nil
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 || pageSize > 100 {
+		pageSize = 20
+	}
+
+	return uc.repo.List(ctx, page, pageSize)
 }

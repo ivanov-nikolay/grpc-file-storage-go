@@ -50,11 +50,47 @@ func (r *postgresFileRepository) GetByFileName(ctx context.Context, fileName str
 	return file, nil
 }
 func (r *postgresFileRepository) List(ctx context.Context, page, pageSize int) (*domain.FileList, error) {
-	return nil, nil
-}
-func (r *postgresFileRepository) Delete(ctx context.Context, fileName string) error {
-	return nil
-}
-func (r *postgresFileRepository) Update(ctx context.Context, file *domain.File) error {
-	return nil
+	offset := (page - 1) * pageSize
+
+	var total int
+	countQuery := `SELECT COUNT(*) FROM files`
+	err := r.db.QueryRowContext(ctx, countQuery).Scan(&total)
+	if err != nil {
+		return nil, err
+	}
+
+	query := `
+				SELECT id, filename, size, path, created_at, updated_at 
+				FROM files
+				ORDER BY created_at DESC
+				LIMIT $1 OFFSET $2
+	`
+	rows, err := r.db.QueryContext(ctx, query, pageSize, offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	files := make([]domain.File, 0)
+	for rows.Next() {
+		var file domain.File
+		err := rows.Scan(
+			&file.ID,
+			&file.Filename,
+			&file.Size,
+			&file.Path,
+			&file.CreatedAt,
+			&file.UpdatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		files = append(files, file)
+	}
+
+	return &domain.FileList{
+		Files: files,
+		Total: total,
+	}, nil
 }
