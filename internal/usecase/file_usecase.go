@@ -27,6 +27,7 @@ func (uc *fileUseCase) UploadFile(ctx context.Context, filename string, data io.
 func (uc *fileUseCase) DownLoadFile(ctx context.Context, filename string) (*domain.File, io.Reader, error) {
 	return nil, nil, nil
 }
+
 func (uc *fileUseCase) ListFiles(ctx context.Context, page, pageSize int) (*domain.FileList, error) {
 	return nil, nil
 }

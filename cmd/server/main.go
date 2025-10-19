@@ -1,11 +1,13 @@
 package main
 
 import (
+	"log"
+
 	"github.com/grpc-file-storage-go/internal/config"
+	"github.com/grpc-file-storage-go/internal/handler/grpc"
 	"github.com/grpc-file-storage-go/internal/repository"
 	"github.com/grpc-file-storage-go/internal/usecase"
 	"github.com/grpc-file-storage-go/pkg/database"
-	"log"
 )
 
 func main() {
@@ -15,6 +17,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to connect to database: %v", err)
 	}
+	defer db.Close()
 
 	migrationManager := database.NewMigrationManager(db)
 
@@ -23,8 +26,9 @@ func main() {
 	}
 
 	fileRepo := repository.NewPostgresFileRepository(db)
-	defer db.Close()
 
 	fileUseCase := usecase.NewFileUseCase(fileRepo, cfg.StoragePath)
-	_ = fileUseCase
+
+	fileHandler := grpc.NewFileHandler(fileUseCase)
+	_ = fileHandler
 }
