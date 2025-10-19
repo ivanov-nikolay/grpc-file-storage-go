@@ -51,6 +51,7 @@ func (uc *fileUseCase) UploadFile(ctx context.Context, filename string, data io.
 		ID:        uuid.New().String(),
 		Filename:  uniqueFilename,
 		Size:      size,
+		Path:      filePath,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
