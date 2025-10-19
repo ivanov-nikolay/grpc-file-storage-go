@@ -18,7 +18,18 @@ func NewPostgresFileRepository(db *sql.DB) FileRepository {
 }
 
 func (r *postgresFileRepository) Save(ctx context.Context, file *domain.File) error {
-	return nil
+	query := `INSERT INTO files (id, filename, size, path, created_at, updated_at) 
+				VALUES($1, $2, $3, $4, $5, $6)`
+	_, err := r.db.ExecContext(ctx, query,
+		file.ID,
+		file.Filename,
+		file.Size,
+		file.Path,
+		file.CreatedAt,
+		file.UpdatedAt,
+	)
+
+	return err
 }
 func (r *postgresFileRepository) GetByFileName(ctx context.Context, fileName string) (*domain.File, error) {
 	return nil, nil
