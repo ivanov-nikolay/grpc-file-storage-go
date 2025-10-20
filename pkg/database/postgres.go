@@ -11,6 +11,11 @@ import (
 	_ "github.com/lib/pq"
 )
 
+const (
+	retries int           = 3
+	delay   time.Duration = 5 * time.Second
+)
+
 func NewDB(cfg config.DatabaseConfig) (*sql.DB, error) {
 	if cfg.CreateDB {
 		if err := CreateDB(cfg); err != nil {
@@ -18,7 +23,7 @@ func NewDB(cfg config.DatabaseConfig) (*sql.DB, error) {
 		}
 	}
 
-	return connectWithRetry(cfg, 3, 5*time.Second) //todo make in .env maxRetries int, delay time.Duration
+	return connectWithRetry(cfg, retries, delay)
 }
 
 func CreateDB(cfg config.DatabaseConfig) error {

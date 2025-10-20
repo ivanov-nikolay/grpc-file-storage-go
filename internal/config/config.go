@@ -6,12 +6,13 @@ import (
 )
 
 type Config struct {
-	GRPCPort      string
-	Database      DatabaseConfig
-	StoragePath   string
-	UploadLimit   int64
-	DownloadLimit int64
-	ListLimit     int64
+	GRPCPort       string
+	Database       DatabaseConfig
+	StoragePath    string
+	MigrationsPath string
+	UploadLimit    int64
+	DownloadLimit  int64
+	ListLimit      int64
 }
 
 type DatabaseConfig struct {
@@ -42,10 +43,11 @@ func LoadConfig() *Config {
 			SuperUser:     getEnv("DATABASE_SUPER_USER", "postgres"),
 			SuperPassword: getEnv("DATABASE_SUPER_PASSWORD", "12345"),
 		},
-		StoragePath:   getEnv("STORAGE_PATH", "./storage/files"),
-		UploadLimit:   getEnvInt64("UPLOAD_LIMIT", 10),
-		DownloadLimit: getEnvInt64("DOWNLOAD_LIMIT", 10),
-		ListLimit:     getEnvInt64("LIST_LIMIT", 100),
+		StoragePath:    getEnv("STORAGE_PATH", "./storage/files"),
+		MigrationsPath: getEnv("MIGRATIONS_PATH", "./migrations"),
+		UploadLimit:    getEnvInt64("UPLOAD_LIMIT", 10),
+		DownloadLimit:  getEnvInt64("DOWNLOAD_LIMIT", 10),
+		ListLimit:      getEnvInt64("LIST_LIMIT", 100),
 	}
 }
 

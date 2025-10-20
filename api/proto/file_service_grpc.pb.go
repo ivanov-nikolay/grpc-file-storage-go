@@ -4,7 +4,7 @@
 // - protoc             v5.29.3
 // source: proto/file_service.proto
 
-package api
+package proto
 
 import (
 	context "context"

@@ -7,4 +7,5 @@ CREATE TABLE IF NOT EXISTS files(
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL
 );
 
-CREATE INDEX idx_files_filename ON files(filename);
+CREATE INDEX IF NOT EXISTS idx_files_filename ON files(filename);
+CREATE INDEX IF NOT EXISTS idx_files_created_at ON files(created_at);
