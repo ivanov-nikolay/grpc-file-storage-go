@@ -3,6 +3,7 @@ package grpc
 import (
 	"context"
 	"io"
+	"strings"
 
 	"github.com/grpc-file-storage-go/api/proto"
 	"github.com/grpc-file-storage-go/internal/usecase"
@@ -65,9 +66,19 @@ func (h *fileHandler) UploadFile(stream proto.FileService_UploadFileServer) erro
 func (h *fileHandler) DownloadFile(req *proto.DownloadFileRequest, stream proto.FileService_DownloadFileServer) error {
 	_, reader, err := h.fileUseCase.DownLoadFile(stream.Context(), req.Filename)
 	if err != nil {
+		if strings.Contains(err.Error(), "not found") || strings.Contains(err.Error(), "does not exist") {
+			return status.Error(codes.NotFound, err.Error())
+		}
 		return status.Error(codes.Internal, err.Error())
 	}
-	defer reader.(io.Closer).Close()
+
+	if reader == nil {
+		return status.Error(codes.Internal, "file reader is nil")
+	}
+
+	if closer, ok := reader.(io.Closer); ok {
+		defer closer.Close()
+	}
 
 	buffer := make([]byte, 64*1024)
 	for {

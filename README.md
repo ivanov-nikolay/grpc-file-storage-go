@@ -26,4 +26,17 @@ protoc --go_out=. --go-grpc_out=. proto/file_service.proto
 Установите зависимости:<br>
 ```bash
 go get -u github.com/lib/pq
+go get -u github.com/stretchr/testify/mock
+```
+Запуск приложения:<br>
+```bash
+ go run cmd/server/main.go
+```
+Запуск клиента для тестирования приложения:<br>
+```bash
+ go run cmd/client/main.go
+```
+Запуск unit тестов:<br>
+```bash
+go test ./...
 ```
