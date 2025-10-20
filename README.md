@@ -40,3 +40,13 @@ go get -u github.com/stretchr/testify/mock
 ```bash
 go test ./...
 ```
+
+## Вы так же можете использовать команды Makefile
+Собрать и запустить все сервисы:<br>
+```bash
+make docker-compose-up
+```
+Остановить:<br>
+```bash
+make docker-compose-down
+```

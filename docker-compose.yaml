@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: file_service
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./migrations:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d file_service"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_USER: user
+      DATABASE_PASSWORD: password
+      DATABASE_NAME: file_service
+      DATABASE_SSLMODE: disable
+      DATABASE_CREATE_DB: "true"
+      DATABASE_SUPER_USER: user
+      DATABASE_SUPER_PASSWORD: password
+      GRPC_PORT: 50051
+      STORAGE_PATH: ./storage/files
+      UPLOAD_LIMIT: 10
+      DOWNLOAD_LIMIT: 10
+      LIST_LIMIT: 100
+    ports:
+      - "50051:50051"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - app_storage:/app/storage
+    command: ["./main"]
+
+volumes:
+  postgres_data:
+  app_storage:

@@ -85,7 +85,7 @@ func (m *MigrationManager) RunMigrations(migrationsDir string) error {
 			}
 
 			if err := m.MarkMigrationApplied(version); err != nil {
-				tx.Rollback()
+				_ = tx.Rollback()
 				return fmt.Errorf("failed to mark migration as applied: %v", err)
 			}
 
